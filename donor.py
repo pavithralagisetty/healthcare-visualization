@@ -2,6 +2,7 @@ import streamlit as st
 from datetime import datetime, date
 import database as db
 import pandas as pd
+import sqlite3 as sql
 
 # function to verify patient id
 def verify_donor_id(donor_id):
@@ -45,13 +46,13 @@ def show_donor_details(list_of_donors):
         st.warning('No data to show')
     elif len(list_of_donors) == 1:
         donor_details = [x for x in list_of_donors[0]]
-        series = pd.Series(data = donor_details, index = donor_titles)
+        series = pd.Series(data = donor_details, index = donor_details)
         st.write(series)
     else:
         donor_details = []
         for donor in list_of_donors:
             donor_details.append([x for x in donor])
-        df = pd.DataFrame(data = donor_details, columns = donor_titles)
+        df = pd.DataFrame(data = donor_details, columns = donor_details)
         st.write(df)
 
 # class containing all the fields and methods required to work with the patients' table in the database
@@ -224,7 +225,7 @@ class Donor:
                 st.write('Here are the details of the donor to be deleted:')
                 show_donor_details(c.fetchall())
 
-                confirm = st.checkbox('Check this box to confirm deletion')
+                confirm = st.checkbox('**Check this box to confirm deletion**')
                 if confirm:
                     delete = st.button('Delete')
 
@@ -243,15 +244,24 @@ class Donor:
     # method to show the complete patient record
     def show_all_donors(self):
         conn, c = db.connection()
-        with conn:
-            c.execute(
-                """
-                SELECT *
-                FROM donor_record;
-                """
-            )
-            show_donor_details(c.fetchall())
-        conn.close()
+        
+        try:
+            c.execute("SELECT * FROM donor_record")
+            donors = c.fetchall()
+            
+            if donors:
+                df = pd.DataFrame(donors, columns=['ID', 'Name', 'Age', 'Gender', 'Date_of_Birth', 
+                                                 'Blood_Group', 'Contact_Number_1', 'Verification_ID', 
+                                                 'Address', 'City', 'State', 'PIN_Code', 
+                                                 'Date_of_Registration', 'Time_of_Registration'])
+                st.dataframe(df)
+            else:
+                st.info("No donors found in the database.")
+                
+        except Exception as e:
+            st.error(f"Error retrieving donors: {e}")
+        finally:
+            conn.close()
 
     # method to search and show a particular patient's details in the database using patient id
     def search_donor(self):
@@ -274,4 +284,32 @@ class Donor:
                 )
                 st.write('Here are the details of the donor you searched for:')
                 show_donor_details(c.fetchall())
+            conn.close()
+
+    def find_nearby_donors(self, city, blood_group):
+        conn = sql.connect('database_1A.db')
+        c = conn.cursor()
+        
+        try:
+            # Query to fetch donors based on city and blood group
+            query = """
+            SELECT id, name, blood_group, contact_number_1, address 
+            FROM donor_record 
+            WHERE LOWER(city) = LOWER(?) 
+            AND blood_group = ?
+            """
+            
+            c.execute(query, (city, blood_group))
+            donors = c.fetchall()
+            
+            if donors:
+                df = pd.DataFrame(donors, columns=['ID', 'Name', 'Blood Group', 'Contact', 'Address'])
+                st.dataframe(df, hide_index=True)
+                st.success(f"Found {len(donors)} donor(s) in {city} with blood group {blood_group}")
+            else:
+                st.info(f"No donors found in {city} with blood group {blood_group}")
+                
+        except Exception as e:
+            st.error(f"An error occurred: {str(e)}")
+        finally:
             conn.close()
