@@ -2,8 +2,11 @@ This is a Blood Donation Management System designed to manage donor registration
 
 # Features:
 Donor Registration: Add and manage donor information, including eligibility checks.
+
 Blood Bank Management: Track blood inventory and update information.
+
 Blood Request: Submit blood requests and find nearby available donors.
+
 Eligibility Check: Automatically verify if a donor is eligible to donate blood.
 
 # Technologies Used:
