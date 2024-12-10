@@ -8,5 +8,7 @@ Eligibility Check: Automatically verify if a donor is eligible to donate blood.
 
 # Technologies Used:
 Python (for backend functionality)
+
 Streamlit (for the user interface)
+
 SQLite3 (for database management)
