@@ -59,6 +59,56 @@ def show_donor_details(list_of_donors):
 class Donor:
 
     def __init__(self):
+        # Add custom CSS for input and output styling
+        st.markdown("""
+            <style>
+            /* Style for text inputs */
+            .stTextInput input, .stTextArea textarea {
+                color: white !important;
+            }
+            
+            /* Style for date input */
+            .stDateInput input {
+                color: white !important;
+            }
+            
+            /* Style for radio buttons */
+            .stRadio label {
+                color: black !important;
+            }
+            
+            /* Style for selectbox */
+            .stSelectbox div[data-baseweb="select"] span {
+                color: white !important;
+            }
+            
+            /* Style for number inputs */
+            .stNumberInput input {
+                color: white !important;
+            }
+
+            /* Style for output text */
+            .dataframe {
+                color: black !important;
+            }
+            
+            /* Style for success/info messages */
+            .stSuccess, .stInfo {
+                color: black !important;
+            }
+            
+            /* Style for verification messages */
+            .element-container div {
+                color: black !important;
+            }
+            
+            /* Style for displayed data */
+            .stMarkdown p {
+                color: black !important;
+            }
+            </style>
+        """, unsafe_allow_html=True)
+        
         self.name = str()
         self.id = str()
         self.gender = str()
@@ -82,7 +132,13 @@ class Donor:
         if gender == 'Other':
             gender = st.text_input('Please mention')
         self.gender = gender
-        dob = st.date_input('Date of birth (YYYY/MM/DD)')
+        dob = st.date_input(
+            "Date of Birth (YYYY/MM/DD)",
+            min_value=datetime(1950, 1, 1),  # Set minimum date to January 1, 1950
+            max_value=datetime.now(),        # Set maximum date to current date
+            value=datetime.now(),            # Default value
+            format="YYYY/MM/DD"
+        )
         self.date_of_birth = dob.strftime('%d-%m-%Y')       # converts DOB to the string format
         self.age = calculate_age(dob)
         self.blood_group = st.text_input('Blood group')
